@@ -28,7 +28,7 @@ else
 fi
 
 echo -e "${GREEN}### Starting services...${NC}"
-docker-compose up -d
+docker compose up -d
 
 echo -e "${GREEN}### Setup complete!${NC}"
 echo -e "${YELLOW}Access your API at: https://your-server-ip${NC}"
