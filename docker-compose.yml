@@ -4,8 +4,6 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
-    ports:
-      - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     command: serve
@@ -15,12 +13,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - ollama-network
 
   ollama-api:
     build: .
     container_name: ollama-api
-    ports:
-      - "3000:3000"
     environment:
       - OLLAMA_HOST=http://ollama:11434
       - PORT=3000
@@ -28,6 +26,27 @@ services:
       ollama:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - ollama-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - ollama-api
+    restart: unless-stopped
+    networks:
+      - ollama-network
+
+networks:
+  ollama-network:
+    driver: bridge
 
 volumes:
   ollama_data:
